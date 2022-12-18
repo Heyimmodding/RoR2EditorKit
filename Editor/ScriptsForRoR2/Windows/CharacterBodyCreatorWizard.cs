@@ -28,7 +28,7 @@ namespace RoR2EditorKit.RoR2Related.EditorWindows
             Boss
         }
 
-        private Dictionary<TemplateOptions, string> TemplateIndex = new Dictionary<TemplateOptions, string>
+        private Dictionary<TemplateOptions, string> templateIndex = new Dictionary<TemplateOptions, string>
         {
             {TemplateOptions.Grounded, Constants.AssetGUIDS.groundedCharacterBodyTemplateGUID },
             {TemplateOptions.Flying, Constants.AssetGUIDS.flyingCharacterBodyTemplateGUID},
@@ -83,7 +83,7 @@ namespace RoR2EditorKit.RoR2Related.EditorWindows
         }
         private Task InstantiateAndUnpackPrefab()
         {
-            string templateToLoad = TemplateIndex[bodyType];
+            string templateToLoad = templateIndex[bodyType];
             var prefab = Constants.AssetGUIDS.QuickLoad<GameObject>(templateToLoad);
             copiedBody = Instantiate(prefab, Vector3.zero, Quaternion.identity);
             return Task.CompletedTask;

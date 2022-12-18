@@ -36,6 +36,7 @@ namespace RoR2EditorKit.Common
             public const string flyingCharacterBodyTemplateGUID = "1cfcc30cbe06ba04690bb7482452a310";
             public const string stationaryCharacterBodyTemplateGUID = "d19f25f365e24f843b17beab8edab99a";
             public const string bossCharacterBodyTemplateGUID = "f2d1c9974df5abb47b8f3f538d28ad11";
+            public const string characterMasterTemplate = "4a875733ed604df40a4a8097687d9843";
             /// <summary>
             /// Loads an asset of type <typeparamref name="T"/> by using the <paramref name="guid"/> provided
             /// </summary>

@@ -1,0 +1,14 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <uie:PropertyField name="characterBody" binding-path="characterBody" tooltip="The CharacterBody of your enemy, used in the creation of the CharacterSpawnCard and the enemy&apos;s master prefab."/>
+    <uie:PropertyField name="creditCost" binding-path="creditCost" tooltip="The director credit cost of your enemy. Base fodder enemies (Lemurian, Beetle, Wisp) are usually 8-11 credits, while heavier enemies/late game enemies range anywhere from 100-300" />
+    <uie:PropertyField name="flyingEnemy" binding-path="isFlying" value="false" tooltip="check this if your enemy is a flying enemy. This changes the nodegraph the enemy uses, so it can navigate in the air" />
+    <ui:Foldout text="Optional Settings" name="optionalContainer" value="false" class="genericHolderFoldout" tooltip="Contains very specific settings not required for most enemies">
+        <uie:PropertyField name="noElites" binding-path="noElites" value="false" tooltip="Makes it so this enemy cannot spawn as an elite"/>
+        <uie:PropertyField name="lunarEnemy" binding-path="lunarEnemy" value="false" tooltip="Only allows this enemy to spawn as a perfected elite"/>
+        <uie:PropertyField name="bossForbidden" binding-path="bossForbidden" value="false" tooltip="Stops this enemy from spawning as a boss"/>
+    </ui:Foldout>
+    <ui:Foldout text="Inventory Settings" name="inventoryContainer" value="false" class="genericHolderFoldout" tooltip="Contains settings that allow you to modify the enemy&apos;s inventory, such as granting items on spawn">  
+        <uie:PropertyField name="itemsToGrant" binding-path="chosenItems" tooltip="This gives the enemy the selected items on spawn"/>
+        <uie:PropertyField name="equipmentToGrant" binding-path="chosenEquipment" tooltip="This gives the enemy the selected equipment on spawn"/>
+    </ui:Foldout>
+</ui:UXML>
