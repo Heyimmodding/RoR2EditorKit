@@ -24,21 +24,22 @@ namespace RoR2EditorKit.RoR2Related.EditorWindows
         public bool noElites;
         public bool lunarEnemy;
         public bool bossForbidden;
-        public int? creditCost;
-        public string chosenEquipment;
+        public int creditCost;
+
+        public EquipmentDef[] chosenEquipment;
         
         [Serializable]
         public struct itemsToGrant
         {
-            public string itemName;
+            public ItemDef itemDef;
             public int itemCount;
         }
 
         public List<itemsToGrant> chosenItems = new List<itemsToGrant>();
 
-        public Dictionary<string, int> ItemsToGrant()
+        public Dictionary<ItemDef, int> ItemsToGrant()
         {
-            return chosenItems.ToDictionary(k => k.itemName, v => v.itemCount);
+            return chosenItems.ToDictionary(k => k.itemDef, v => v.itemCount);
         }
 
         [CustomPropertyDrawer(typeof(itemsToGrant))]
@@ -48,11 +49,12 @@ namespace RoR2EditorKit.RoR2Related.EditorWindows
             {
                 var container = new VisualElement();
 
-                var itemNameProperty = new PropertyField(property.FindPropertyRelative("itemName"));
+                var itemNameProperty = new PropertyField(property.FindPropertyRelative("itemDef"));
                 var itemCountProperty = new PropertyField(property.FindPropertyRelative("itemCount"));
 
                 container.Add(itemNameProperty);
                 container.Add(itemCountProperty);
+
                 return container;
 
             }
@@ -71,26 +73,18 @@ namespace RoR2EditorKit.RoR2Related.EditorWindows
 
         private GameObject tempPrefab;
         private GameObject finishedMaster;
+        private GameObject instantiatedBody;
 
         protected override async Task<bool> RunWizard()
         {
-            if(characterBody.gameObject.name.IsNullOrEmptyOrWhitespace())
-            {
-                Debug.LogError("Prefab name is null, empty, or whitespace! Is this intended?");
-                return false;
-
-            }
+           
             if (characterBody = null)
             {
                 Debug.LogError("No CharacterBody found!");
                 return false;
             }
-            if (!creditCost.HasValue)
-            {
-                Debug.LogError("Please assign a credit value!");
-                return false;
-            }
-            bodyName = characterBody.gameObject.name.Replace("Body", string.Empty);
+
+            Debug.LogError(characterBody);
 
             try
             {
@@ -122,6 +116,7 @@ namespace RoR2EditorKit.RoR2Related.EditorWindows
         {
             CharacterMaster master = tempPrefab.GetComponent<CharacterMaster>();
             master.bodyPrefab = characterBody.gameObject;
+            
             tempPrefab.name = $"{bodyName}MonsterMaster";
             return Task.CompletedTask;
         }
@@ -163,58 +158,28 @@ namespace RoR2EditorKit.RoR2Related.EditorWindows
             {
                 csc.eliteRules = SpawnCard.EliteRules.Default;
             }
-            
-            //compiles a list of every itemdef in the game (does not work with modded items)
-            FieldInfo[] itemList = typeof(RoR2Content.Items).GetFields().Concat(typeof(DLC1Content.Items).GetFields()).ToArray();
-            //compiles a list of every equipmentdef in the game (again, doesnt work with mods. the idea is that you can just manually input your item/equip def that you made. However, for other mods the swap must be done at runtime)
-            FieldInfo[] equipList = typeof(RoR2Content.Equipment).GetFields().Concat(typeof(DLC1Content.Equipment).GetFields()).ToArray();
 
-            List<ItemDef> fetchedItems = new List<ItemDef>();
-
-            //Checks the list of every item def to find the chosen items and formats them to be uniform for later
-            foreach (string itemDefToFind in ItemsToGrant().Keys)
-            {
-                for (int i = 0; i < itemList.Length; i++)
-                {
-                    if (itemList.GetValue(i).ToString().ToLower() == itemDefToFind.ToLower())
-                    {
-                        fetchedItems.Add((ItemDef)itemList.GetValue(i));
-                    }
-                }
-                ItemsToGrant().Remove(itemDefToFind);
-                ItemsToGrant().Add(itemDefToFind.ToLower(), ItemsToGrant()[itemDefToFind]);
-            }
-
-            //creates an array to contain our pairs
             ItemCountPair[] bodyItems = new ItemCountPair[0];
-            //creates a local equipdef to assign to the body
-            EquipmentDef[] bodyEquip = new EquipmentDef[0];
-
-            //creates an itemcountpair for each chosen item
-            foreach (ItemDef itemDef in fetchedItems)
+            foreach(ItemDef def in ItemsToGrant().Keys)
             {
-                string[] formatName = itemDef.nameToken.Split('_');
-                string itemName = formatName[2].ToLower();
-
                 ItemCountPair temp = new ItemCountPair
                 {
-                    itemDef = itemDef,
-                    count = ItemsToGrant()[itemName]
+                    itemDef = def,
+                    count = ItemsToGrant()[def]
                 };
 
                 bodyItems.Append(temp);
             }
-
-            for(int i = 0; i < equipList.Length; i++)
+           
+            if(bodyItems.Length > 0)
             {
-                if(equipList.GetValue(i).ToString().ToLower() == chosenEquipment.ToLower())
-                {
-                    bodyEquip.Append((EquipmentDef)equipList.GetValue(i));
-                }
+                csc.itemsToGrant = bodyItems;
             }
-
-            csc.itemsToGrant = bodyItems;
-            csc.equipmentToGrant = bodyEquip;
+            if(chosenEquipment.Length > 0)
+            {
+                csc.equipmentToGrant = chosenEquipment;
+            }
+            
 
             var directory = IOUtils.GetCurrentDirectory();
             var destpath = FileUtil.GetProjectRelativePath(IOUtils.FormatPathForUnity(Path.Combine(directory, $"csc{bodyName}.asset")));
